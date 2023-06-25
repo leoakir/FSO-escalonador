@@ -1,40 +1,5 @@
 #include "main.h"
 
-//
-#define MAX_MSG_SIZE 100
-
-struct my_message
-{
-    long mtype;
-    char mtext[MAX_MSG_SIZE];
-};
-
-// Union for semaphore operations
-union semun
-{
-    int val;               // Value for SETVAL
-    struct semid_ds *buf;  // Buffer for IPC_STAT, IPC_SET
-    unsigned short *array; // Array for GETALL, SETALL
-};
-
-// Function to perform semaphore operations
-int semaphore_operation(int semid, int semnum, int op)
-{
-    struct sembuf sb;
-    sb.sem_num = semnum;   // Semaphore index in the array
-    sb.sem_op = op;        // Semaphore operation (positive or negative value)
-    sb.sem_flg = SEM_UNDO; // Enable undo
-
-    if (semop(semid, &sb, 1) == -1)
-    {
-        perror("semop");
-        return -1; // Error occurred
-    }
-
-    return 0; // Successful operation
-}
-//
-
 int escalonador(int N_AUX){
     //
     key_t key;
@@ -56,14 +21,6 @@ int escalonador(int N_AUX){
     if ((msgid = msgget(key, IPC_CREAT | 0666)) == -1)
     {
         perror("msgget");
-        exit(1);
-    }
-    //
-    //
-    // Create a unique key for the semaphore
-    if ((key = ftok(cwd, 'A')) == -1)
-    {
-        perror("ftok");
         exit(1);
     }
 
@@ -94,23 +51,23 @@ int escalonador(int N_AUX){
         pid_t pid = fork();
         pidVector[i] = pid;
         int mytype = i+1;
-        if (pid != 0 && pid != -1){
-            message.mtype = mytype;                      // Set the message type
+        // if (pid != 0 && pid != -1){
+        //     message.mtype = mytype;                      // Set the message type
             
-            strcpy(message.mtext, cwd); // Set the message data
+        //     strcpy(message.mtext, cwd); // Set the message data
 
-            if (msgsnd(msgid, &message, sizeof(message.mtext), 0) == -1)
-            {
-                perror("msgsnd");
-                exit(1);
-            }
-            printf("Parent making message\n");
-            if (semaphore_operation(semid[i], 0, 1) == -1)
-            {
-                exit(1);
-            }
-        }
-        else if (pid < 0)
+        //     if (msgsnd(msgid, &message, sizeof(message.mtext), 0) == -1)
+        //     {
+        //         perror("msgsnd");
+        //         exit(1);
+        //     }
+        //     printf("Parent making message\n");
+        //     if (semaphore_operation(semid[i], 0, 1) == -1)
+        //     {
+        //         exit(1);
+        //     }
+        // }
+        if (pid < 0)
         {
             perror("fork");
             return 1;
@@ -143,7 +100,25 @@ int escalonador(int N_AUX){
     // for(int i = 0; i < N_AUX; i++){
     //     printf("My Child: %d\n", pidVector[i]);
     // }
+    for (int i = 0; i < N_AUX; i++)
+    {
+        message.mtype = i+1; // Set the message type
 
+        strcpy(message.mtext, cwd); // Set the message data
+
+        if (msgsnd(msgid, &message, sizeof(message.mtext), 0) == -1)
+        {
+            perror("msgsnd");
+            exit(1);
+        }
+        printf("Parent making message\n");
+        if (semaphore_operation(semid[i], 0, 1) == -1)
+        {
+            exit(1);
+        }
+    }
+
+        
     // Wait for all child processes to finish
     for (int i = 0; i < N_AUX; i++)
     {
