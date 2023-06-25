@@ -1,6 +1,6 @@
 #include "main.h"
 
-int N_AUX = 4;
+//clear && gcc prim.c -o prim.o -c && gcc runner.c -o runner.o -c && gcc escalonador.c -o escalonador.o -c && gcc main.c -o main.o -c && gcc -o run prim.o runner.o escalonador.o main.o
 
 int main(int argc, char **argv){
     time_t t;
@@ -30,10 +30,12 @@ int main(int argc, char **argv){
     int process_types[process_count];
     for(int i = 0; i < process_count; i++){
         process_types[i] = rand()%3;
+        printf("%d ", process_types[i]);
     }
+    printf("\n");
 
     //chamar escalonador;
-    escalonador(N_AUX);
+    escalonador(process_count, process_types);
 
 
     return 0;

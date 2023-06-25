@@ -12,6 +12,7 @@
 #include <sys/msg.h>
 
 #define MAX_MSG_SIZE 100
+#define N_AUX 4
 
 struct my_message
 {
@@ -27,5 +28,10 @@ union semun
     unsigned short *array; // Array for GETALL, SETALL
 };
 
-int escalonador();
+key_t getKey();
+int escalonador(int process_count, int process_types[process_count]);
 int semaphore_operation(int semid, int semnum, int op);
+int runner(int msgid, int semid, int mytype);
+int getMsgid(key_t key);
+int getSemid(key_t key, int num_sem);
+void initSem(int semid, union semun arg, int num_sem);
