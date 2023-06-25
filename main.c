@@ -1,9 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <time.h>
-#include <limits.h>
-#include <string.h>
+#include "main.h"
+
+int N_AUX = 4;
 
 int main(int argc, char **argv){
     time_t t;
@@ -36,6 +33,7 @@ int main(int argc, char **argv){
     }
 
     //chamar escalonador;
+    escalonador(N_AUX);
 
 
     return 0;
